@@ -1,1 +1,7 @@
 TODO
+====
+
+
+-[] Add entropy to shallow loss function
+-[] Make a network with sigmoid output from shallow
+-[] Make noisy layers

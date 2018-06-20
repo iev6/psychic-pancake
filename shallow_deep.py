@@ -6,7 +6,8 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.models import Sequential,Model
 from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Conv2D, MaxPooling2D,GaussianNoise
-from keras import regularizers
+from keras import regularizers,losses
+from keras import backend as K
 import os
 import numpy as np
 
@@ -59,6 +60,40 @@ def shallow_model(input_shape,depth=2,num_classes=10):
     #final softmax layer
     output = Dense(num_classes,activation="softmax",name="cifar_shallow_out") (x)
     return output
+
+class Regularizer(object):
+    """Regularizer base class.
+    """
+
+    def __call__(self, x):
+        return 0.
+
+    @classmethod
+    def from_config(cls, config):
+        return cls(**config)
+
+
+class entpy(Regularizer):
+    """Regularizer for L1 and L2 regularization.
+    # Arguments
+        l1: Float; L1 regularization factor.
+        l2: Float; L2 regularization factor.
+    """
+
+    def __init__(self, l1=0.):
+        self.l1 = K.cast_to_floatx(l1)
+
+    def __call__(self, x):
+        regularization = 0.
+        if self.l1:
+            regularization += K.sum(self.l1 * K.log(x))
+        
+        return regularization
+
+    def get_config(self):
+        return {'l1': float(self.l1)}
+
+
 
 mdl = Model(inputs=input,outputs=shallow_model(input_shape))
 opt = keras.optimizers.rmsprop(lr=0.0001, decay=1e-6)
